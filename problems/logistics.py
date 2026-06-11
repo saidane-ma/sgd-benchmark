@@ -3,7 +3,7 @@ import numpy as np
 class LogisticRegression:
     def __init__(self,X,y):
         self.X=X
-        self.y=y
+        self.y=y.T
     
     def sigmoid(self,z):
         return 1/(1+np.exp(-z))
@@ -16,7 +16,7 @@ class LogisticRegression:
         return np.sum(s)/n
 
     def gradient(self,w,indices=None):
-        if indices == None:
+        if indices is None:
             X_batch=self.X
             y_batch=self.y
             n=len(self.X)
