@@ -24,8 +24,10 @@ sgd-benchmark/
 ├── plot.py              # Script to generate convergence figures
 └── README.md            # Project documentation
 ```
-🚀 Getting Started
-Prerequisites
+##  🚀 Getting Started
+
+Prerequisites:
+
 Ensure you have Python 3.8+ installed. This project relies on standard scientific computing libraries:
 
 NumPy
@@ -42,7 +44,7 @@ git clone [https://github.com/](https://github.com/)saidane-ma/sgd-benchmark.git
    cd sgd-benchmark
 ```
 
-🛠️ Usage
+## 🛠️ Usage
 1. Running the Benchmark
 To run the full suite (all optimizers across all optimization problems), execute the main benchmark script:
 
@@ -57,7 +59,7 @@ To generate and view the convergence plots (e.g., Optimality Gap / Loss vs. Iter
 python plot.py
 ```
 
-🔬 Algorithms & Optimization Problems
+## 🔬 Algorithms & Optimization Problems
 Supported Optimizers
 Standard / Adaptive: Vanilla SGD, Momentum, Nesterov Accelerated Gradient, AdaGrad, Adam.
 
@@ -70,8 +72,8 @@ Logistic Regression: Strongly convex, smooth objective.
 
 Neural Networks: Non-convex optimization problem.
 
-📜 License
+## 📜 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-✍️ Author
+## ✍️ Author
 Mohamed Amine SAIDANE - Initial Work - @saidane-ma
