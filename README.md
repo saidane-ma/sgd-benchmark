@@ -23,7 +23,7 @@ sgd-benchmark/
 ├── benchmark.py         # Main entry point to run experiments
 ├── plot.py              # Script to generate convergence figures
 └── README.md            # Project documentation
-
+```
 🚀 Getting Started
 Prerequisites
 Ensure you have Python 3.8+ installed. This project relies on standard scientific computing libraries:
