@@ -1,0 +1,9 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE and Environment files (optional but highly recommended)
+.vscode/
+.idea/
+.DS_Store
