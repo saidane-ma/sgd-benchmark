@@ -12,7 +12,7 @@ def generate_gaussian_blobs(n_features=2, n_samples=1000, random_state_seed=5):
     b=np.array([1]*n_samples)
     X=np.random.randn(n_samples,n_features)
     X=np.insert(X,0,b,axis=1)
-    y=np.random.randint(0,2,np.size(n_samples,))
+    y=np.random.randint(0,2,size=(n_samples,))
 
     return X,y
 
