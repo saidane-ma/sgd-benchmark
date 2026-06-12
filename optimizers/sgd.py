@@ -7,27 +7,27 @@ class SGD:
         self.X=X
         self.y=y
     
-    def polyak(self,w,beta=0.9):
+    def polyak(self,w,indices,beta=0.9):
         L=LogisticRegression(self.X,self.y)
         v=np.zeros_like(w)
         for i in range(len(self.X)):
-            v=beta*v+(1-beta)*L.gradient(w)
+            v=beta*v+(1-beta)*L.gradient(w,indices)
             w-=v
         return w
     
-    def momentum(self,w,beta=0.9):
+    def momentum(self,w,indices,beta=0.9):
         L=LogisticRegression(self.X,self.y)
         v=np.zeros_like(w)
         for i in range(len(self.X)):
-            v=beta*v+L.gradient(w)
+            v=beta*v+L.gradient(w,indices)
             w-=(1-beta)*v
         return w
 
-    def nestrov(self,w,beta=0.9):
+    def nestrov(self,w,indices,beta=0.9):
         L=LogisticRegression(self.X,self.y)
         v=np.zeros_like(w)
         for i in range(len(self.X)):
-            v=beta*v+(1-beta)*L.gradient(w-v)
+            v=beta*v+(1-beta)*L.gradient(w-v,indices)
             w-=v
         return v
         
