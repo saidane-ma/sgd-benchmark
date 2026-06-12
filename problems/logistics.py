@@ -12,7 +12,8 @@ class LogisticRegression:
         z=self.X@w
         y_pred=self.sigmoid(z)
         n=len(self.X)
-        s=-self.y*np.log(y_pred)-(1-self.y)*np.log(1-y_pred)
+        s=-self.y*np.log(y_pred+(1e-10))-(1-self.y)*np.log(1-y_pred+(1e-10))
+
         return np.sum(s)/n
 
     def gradient(self,w,indices=None):
