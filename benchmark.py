@@ -11,7 +11,7 @@ n_samples=1000
 n_features=2
 alpha=0.01
 n_iterations=500
-batch_size=1
+batch_size=10
 beta=0.9
 
 #data generation
@@ -42,6 +42,7 @@ history_polyak=[]
 #benchmarking loop
 for i in range(n_iterations):
     indices=np.random.choice(n_samples,size=(batch_size,),replace=False)
+
     grad=L.gradient(w0,indices)
     w0=w0-alpha*grad
     history.append(L.loss(w0))
@@ -60,6 +61,7 @@ for i in range(n_iterations):
 
 
 #plotting
+print("Plotting")
 
 fig, axs = plt.subplots(2, 3)
 
@@ -78,11 +80,13 @@ axs[1, 1].set_title("Adagrad")
 axs[0,2].plot(history_Adam)
 axs[0,2].set_title("Adam")
 
+axs[1,2].plot(Adam.history)
+axs[1,2].set_title("Adam norm")
+axs[1,2].set_xlabel("Iterations")
+axs[1,2].set_ylabel("Norm of gradient")
+axs[1,2].set_ylim(0,1)
 
 fig.suptitle('SGD Variants')
 
-
 plt.tight_layout()
-plt.xlabel("Iterations")
-plt.ylabel("Loss")
 plt.show()

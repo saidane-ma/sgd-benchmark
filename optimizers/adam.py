@@ -8,10 +8,12 @@ class Adam:
         self.L=LogisticRegression(self.X,self.y)
         self.m=np.zeros_like(w)
         self.m2=np.zeros_like(w)
+        self.history=[]
         
     def adam(self,w,indices,n,beta1=0.9,beta2=0.999,alpha=0.001):
 
         g=self.L.gradient(w,indices)
+        self.history.append(np.linalg.norm(g))
         self.m=self.m*beta1 + (1-beta1)*g
         self.m2=self.m2*beta2 + (1-beta2)*g*g
         
