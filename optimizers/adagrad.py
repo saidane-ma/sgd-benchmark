@@ -9,7 +9,7 @@ class Adagrad:
 
     def adagrad(self,w,indices,alpha=0.1):
         self.g+=np.square(self.L.gradient(w,indices))
-        w=w-(alpha/(np.sqrt(self.g)))*self.L.gradient(w,indices)
+        w=w-(alpha/(np.sqrt(self.g + 1e-10)))*self.L.gradient(w,indices)
         
         return w
 
