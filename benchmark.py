@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from data import*
 from problems.logistics import*
 from optimizers.sgd import *
+from optimizers.adagrad import*
 
 #parameters
 n_samples=1000
@@ -18,6 +19,7 @@ np.random.seed(5)
 
 L=LogisticRegression(X,y)
 SGD=SGD(X,y,np.random.randn(n_features+1))
+Adagrad=Adagrad(X,y,np.random.randn(n_features+1))
 
 w0=np.random.randn(n_features+1)
 w1=np.random.randn(n_features+1)
@@ -40,8 +42,8 @@ for i in range(n_iterations):
     w0=w0-alpha*grad
     history.append(L.loss(w0))
 
-    w1=SGD.momentum(w1,indices,alpha,beta)
-    history_SGDM.append(L.loss(w1))
+    w1=Adagrad.adagrad(w1,indices,alpha)
+    history_Adagrad.append(L.loss(w1))
 
     w2=SGD.polyak(w2,indices,alpha,beta)
     history_polyak.append(L.loss(w2))
@@ -56,19 +58,15 @@ fig, axs = plt.subplots(2, 2)
 
 axs[0, 0].plot(history) 
 axs[0, 0].set_title("SGD")
-axs[0, 0].set_ylim(0.5,1.5)
 
 axs[0, 1].plot(history_Nesterov)
 axs[0, 1].set_title("Nesterov")
-axs[0, 1].set_ylim(0.5,1.5)
 
 axs[1, 0].plot(history_polyak)
 axs[1, 0].set_title("Polyak")
-axs[1, 0].set_ylim(0.5,1.5)
 
-axs[1, 1].plot(history_SGDM)
-axs[1, 1].set_title("Standard Momentum")
-axs[1, 1].set_ylim(0.5,1.5)
+axs[1, 1].plot(history_Adagrad)
+axs[1, 1].set_title("Adagrad")
 
 
 fig.suptitle('SGD Variants')
