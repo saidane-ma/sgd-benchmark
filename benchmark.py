@@ -4,13 +4,14 @@ from data import*
 from problems.logistics import*
 from optimizers.sgd import *
 from optimizers.adagrad import*
+from optimizers.adam import *
 
 #parameters
 n_samples=1000
 n_features=2
 alpha=0.01
 n_iterations=500
-batch_size=10
+batch_size=1
 beta=0.9
 
 #data generation
@@ -20,11 +21,14 @@ np.random.seed(5)
 L=LogisticRegression(X,y)
 SGD=SGD(X,y,np.random.randn(n_features+1))
 Adagrad=Adagrad(X,y,np.random.randn(n_features+1))
+Adam=Adam(X,y,np.random.randn(n_features+1))
 
 w0=np.random.randn(n_features+1)
 w1=np.random.randn(n_features+1)
 w2=np.random.randn(n_features+1)
 w3=np.random.randn(n_features+1)
+w4=np.random.randn(n_features+1)
+
 
 #storing for plot
 history=[]
@@ -51,10 +55,13 @@ for i in range(n_iterations):
     w3=SGD.nestrov(w3,indices,alpha,beta)
     history_Nesterov.append(L.loss(w3))
     
+    w4=Adam.adam(w4,indices,i+1)
+    history_Adam.append(L.loss(w4))
+
 
 #plotting
 
-fig, axs = plt.subplots(2, 2)
+fig, axs = plt.subplots(2, 3)
 
 axs[0, 0].plot(history) 
 axs[0, 0].set_title("SGD")
@@ -67,6 +74,9 @@ axs[1, 0].set_title("Polyak")
 
 axs[1, 1].plot(history_Adagrad)
 axs[1, 1].set_title("Adagrad")
+
+axs[0,2].plot(history_Adam)
+axs[0,2].set_title("Adam")
 
 
 fig.suptitle('SGD Variants')
