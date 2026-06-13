@@ -10,7 +10,7 @@ class SAG:
         self.L=LogisticRegression(X,y)
         self.g=np.zeros_like(self.X)
 
-    def sag(self,w,indices,alpha=0.0001):
+    def sag(self,w,indices,alpha=0.1):
         k=np.random.choice(indices)
         self.g[k-1]=self.L.gradient(w,[k])
         w-=alpha*np.mean(self.g,axis=0)
