@@ -1,0 +1,178 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+COLORS = {
+    "SGD":              "#6C8EBF",
+    "Polyak":           "#EF9F27",
+    "Nesterov":         "#D85A30",
+    "Adagrad":          "#7F77DD",
+    "Adam":             "#1D9E75",
+    "SAG":              "#C45BAA",
+    "SVRG":             "#E8E8E8",
+    "NN":               "#F4D03F",
+}
+
+STYLE = {
+    "bg":       "#0F1117",
+    "panel":    "#1A1D27",
+    "border":   "#2A2D3A",
+    "text":     "#E0E0E0",
+    "subtext":  "#8A8FA8",
+    "grid":     "#1E2130",
+}
+
+def _apply_dark(fig, axes):
+    fig.patch.set_facecolor(STYLE["bg"])
+    for ax in np.array(axes).flat:
+        ax.set_facecolor(STYLE["panel"])
+        ax.tick_params(colors=STYLE["subtext"], labelsize=8)
+        ax.xaxis.label.set_color(STYLE["subtext"])
+        ax.yaxis.label.set_color(STYLE["subtext"])
+        ax.title.set_color(STYLE["text"])
+        for spine in ax.spines.values():
+            spine.set_edgecolor(STYLE["border"])
+        ax.grid(True, linestyle="--", linewidth=0.4, color=STYLE["grid"])
+
+
+def plot_grid(history, x_costs, title="SGD Variants"):
+    names = list(history.keys())
+    n =len(names)
+    cols= 3
+    rows=(n+cols-1)//cols
+
+    fig, axs = plt.subplots(rows, cols,figsize=(8,6),layout="constrained")
+    _apply_dark(fig, axs)
+    fig.suptitle(title, color=STYLE["text"], fontsize=13, fontweight="bold")
+
+    for idx, name in enumerate(names):
+        ax = axs.flat[idx]
+        color = COLORS.get(name, "#FFFFFF")
+        ax.plot(x_costs[name], history[name], color=color, linewidth=1.6)
+        ax.set_title(name, fontsize=10, color=color)
+        ax.set_xlabel("Gradient calls", fontsize=8)
+        ax.set_ylabel("Loss", fontsize=8)
+
+    for idx in range(len(names), rows * cols):
+        axs.flat[idx].set_visible(False)
+
+    #plt.tight_layout()
+
+
+def plot_combined(history, x_costs):
+    fig, ax = plt.subplots()
+    _apply_dark(fig, [ax])
+    ax.set_title("Stochastic Optimization — Convergence", color=STYLE["text"], fontsize=12)
+
+    for name, losses in history.items():
+        lw = 2.5 if name == "SVRG" else 1.5
+        ax.plot(x_costs[name], losses, label=name,
+                color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9)
+        ax.set_xlim(min(x_costs[name]))
+
+    ax.set_xlabel("Gradient calls", fontsize=9)
+    ax.set_ylabel("Loss", fontsize=9)
+    legend = ax.legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+    legend.get_frame().set_facecolor(STYLE["panel"])
+    plt.tight_layout()
+
+
+def plot_log_scale(history, x_costs):
+    fig, ax = plt.subplots()
+    _apply_dark(fig, [ax])
+    ax.set_title("Convergence — Log Scale  (linear vs sublinear separation)",
+                 color=STYLE["text"], fontsize=12)
+
+    for name, losses in history.items():
+        lw = 2.5 if name == "SVRG" else 1.5
+        ax.semilogy(x_costs[name], losses, label=name,
+                    color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9, nonpositive='mask')
+    ax.set_xlim(0,5000)
+    ax.set_xlabel("Gradient calls", fontsize=9)
+    ax.set_ylabel("Loss", fontsize=9)
+    ax.set_yscale('log')
+    legend = ax.legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+    legend.get_frame().set_facecolor(STYLE["panel"])
+    plt.tight_layout()
+
+
+def plot_decision_boundary(weights, X, y, sigmoid_fn):
+    """
+    weights   : dict  name → w  (shape d+1 with bias prepended)
+    X         : (n, d) no bias column
+    y         : (n,)
+    sigmoid_fn: callable σ(z) → probabilities
+    """
+    names = list(weights.keys())
+    n =len(names)
+    cols=3
+    rows =(n+cols-1)//cols
+
+    x_min, x_max=X[:, 1].min()-0.5,X[:, 1].max() +0.5
+    y_min, y_max =X[:, 2].min()-0.5, X[:, 2].max()+0.5
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 300),np.linspace(y_min, y_max, 300))
+    grid = np.c_[np.ones(xx.ravel().shape), xx.ravel(), yy.ravel()]
+
+    fig, axs = plt.subplots(rows, cols)
+    _apply_dark(fig, axs)
+    fig.suptitle("Decision Boundaries", color=STYLE["text"], fontsize=13,fontweight="bold")
+
+    cmap_bg  = ListedColormap(["#1A2A3A", "#1A3A2A"])
+    cmap_pts = ListedColormap(["#6C8EBF", "#EF9F27"])
+
+    for idx, name in enumerate(names):
+        ax = axs.flat[idx]
+        w = weights[name]
+        Z = sigmoid_fn(grid @ w).reshape(xx.shape)
+        ax.contourf(xx, yy, Z, alpha=0.35, cmap=cmap_bg, levels=50)
+        ax.contour(xx, yy, Z, levels=[0.5],
+                   colors=[COLORS.get(name, "#FFFFFF")], linewidths=1.5)
+        ax.scatter(X[:,1], X[:,2], c=y, cmap=cmap_pts,
+                   s=18, edgecolors="none", alpha=0.8)
+        ax.set_title(name, fontsize=10, color=COLORS.get(name, "#FFFFFF"))
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    for idx in range(len(names), rows*cols):
+        axs.flat[idx].set_visible(False)
+    plt.tight_layout()
+
+
+def plot_grad_norms(grad_histories):
+    fig, ax = plt.subplots()
+    _apply_dark(fig, [ax])
+    ax.set_title("Gradient Norm vs Iterations", color=STYLE["text"], fontsize=12)
+
+    for name, norms in grad_histories.items():
+        ax.plot(norms, label=name, color=COLORS.get(name, "#FFFFFF"),
+                linewidth=1.4, alpha=0.85)
+
+    ax.set_xlabel("Iterations", fontsize=9)
+    ax.set_ylabel("‖∇L‖", fontsize=9)
+    legend = ax.legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+    legend.get_frame().set_facecolor(STYLE["panel"])
+    plt.tight_layout()
+
+
+def plot_wallclock(history, times):
+    """
+    times : dict  name → list of cumulative seconds
+    """
+    fig, ax = plt.subplots()
+    _apply_dark(fig, [ax])
+    ax.set_title("Convergence vs Wall-Clock Time", color=STYLE["text"], fontsize=12)
+
+    for name, losses in history.items():
+        lw = 2.5 if name == "SVRG" else 1.5
+        ax.semilogy(times[name], losses, label=name,
+                color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9)
+    ax.set_xlim(0,0.02)
+    ax.set_xlabel("Time (seconds)", fontsize=9)
+    ax.set_ylabel("Loss", fontsize=9)
+    legend = ax.legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+    legend.get_frame().set_facecolor(STYLE["panel"])
+    plt.tight_layout()
