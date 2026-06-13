@@ -13,4 +13,6 @@ class Adagrad:
         
         return w
 
+    def step(self,w,indices,i,alpha=0.1):
+        return self.adagrad(w,indices,alpha)
     
