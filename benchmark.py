@@ -6,106 +6,107 @@ from optimizers.sgd import *
 from optimizers.adagrad import*
 from optimizers.adam import *
 from optimizers.sag import *
+from optimizers.svrg import *
+from problems.neural import*
+from plot import*
+import time
+
+np.random.seed(5)
 
 #parameters
-n_samples=100
+n_samples=1000
 n_features=2
 alpha=0.01
-n_iterations=5000
+n_iterations=50
 batch_size=10
 beta=0.9
 
 #data generation
 X, y=generate_gaussian_blobs(n_features,n_samples)
-np.random.seed(5)
 
 L=LogisticRegression(X,y)
-SGD=SGD(X,y,np.random.randn(n_features+1))
-Adagrad=Adagrad(X,y,np.random.randn(n_features+1))
-Adam=Adam(X,y,np.random.randn(n_features+1))
-SAG=SAG(X,y,np.random.randn(n_features+1))
 
 w= np.random.randn(n_features + 1)
 
-# 2. Distribute identical copies to every algorithm
+
 w0 = np.copy(w) # SGD
 w1 = np.copy(w) # Adagrad
 w2 = np.copy(w) # Polyak
 w3 = np.copy(w) # Nesterov
 w4 = np.copy(w) # Adam
 w5 = np.copy(w) # SAG
-
+w6 = np.copy(w) # SVRG
 
 #storing for plot
-history=[]
-history_SGDM=[]
-history_Adam=[]
-history_Adagrad=[]
-history_Nesterov=[]
-history_polyak=[]
-history_sag=[]
+history = {
+    "SGD":      [],
+    "Polyak":   [],
+    "Nesterov": [],
+    "Adagrad":  [],
+    "Adam":     [],
+    "SAG":      [],
+    "SVRG":     [],
+}
+
+weights = {
+    "SGD": w0, "Polyak": w2, "Nesterov": w3,
+    "Adagrad": w1, "Adam": w4, "SAG": w5, "SVRG": w6
+}
+
+
+optimizers={
+    "SGD":      SGD(X, y, w,"SGD"),
+    "Polyak":   SGD(X, y, w,"polyak"),
+    "Nesterov": SGD(X, y, w,"nesterov"),
+    "Adagrad":  Adagrad(X, y, w),
+    "Adam":     Adam(X, y, w),
+    "SAG":      SAG(X, y, w),
+    "SVRG":     SVRG(X, y, w),
+}
+
+times = {name: [] for name in history}
+t_cumul = {name: 0.0 for name in history}
 
 #benchmarking loop
+
 for i in range(n_iterations):
     indices=np.random.choice(n_samples,size=(batch_size,),replace=False)
-
-    grad=L.gradient(w0,indices)
-    w0=w0-alpha*grad
-    history.append(L.loss(w0))
-
-    w1=Adagrad.adagrad(w1,indices,alpha)
-    history_Adagrad.append(L.loss(w1))
-
-    w2=SGD.polyak(w2,indices,alpha,beta)
-    history_polyak.append(L.loss(w2))
     
-    w3=SGD.nestrov(w3,indices,alpha,beta)
-    history_Nesterov.append(L.loss(w3))
-    
-    w4=Adam.adam(w4,indices,i+1)
-    history_Adam.append(L.loss(w4))
-
-    w5=SAG.sag(w5,indices)
-    history_sag.append(L.loss(w5))
+    for name, optimizer in optimizers.items():
+        t0 = time.perf_counter()
+        weights[name]=optimizer.step(weights[name],indices,i+1)
+        history[name].append(L.loss(weights[name]))
+        t_cumul[name] += time.perf_counter()-t0
+        times[name].append(t_cumul[name])
 
 
-print(history_sag[0])
-print(history_polyak[0])
+
+#added different steps for x axis to account for different computation approaches and hold a fair comparaison on the plots
+
+iterations = np.arange(n_iterations)
+
+x_sgd =iterations *batch_size 
+x_polyak =iterations* batch_size
+x_adam = iterations *batch_size
+x_adagrad= iterations * batch_size
+x_sag= iterations *batch_size
+x_svrg=iterations*(n_samples+(2*n_samples))
 
 #plotting
-print("Plotting")
+print (" Plotting ")
+x_costs = {
+    "SGD":      x_sgd,
+    "Polyak":   x_polyak,
+    "Nesterov": x_sgd,
+    "Adagrad":  x_adagrad,
+    "Adam":     x_adam,
+    "SAG":      x_sag,
+    "SVRG":     x_svrg,
+}
 
-fig, axs = plt.subplots(3, 3)
-
-axs[0, 0].plot(history) 
-axs[0, 0].set_title("SGD")
-
-axs[0, 1].plot(history_Nesterov)
-axs[0, 1].set_title("Nesterov")
-
-axs[1, 0].plot(history_polyak)
-axs[1, 0].set_title("Polyak")
-
-axs[1, 1].plot(history_Adagrad)
-axs[1, 1].set_title("Adagrad")
-
-axs[0,2].plot(history_Adam)
-axs[0,2].set_title("Adam")
-
-axs[2,0].plot(history_sag)
-axs[2,0].set_title("SAG")   
-#axs[2,0].set_ylim(0.6,1)
-
-#axs[2,2].plot(history_svrg)
-axs[2,2].set_title("SVRG")
-
-"""axs[1,2].plot(Adam.history)
-axs[1,2].set_title("Adam norm")
-axs[1,2].set_xlabel("Iterations")
-axs[1,2].set_ylabel("Norm of gradient")
-axs[1,2].set_ylim(0,1)"""
-
-fig.suptitle('SGD Variants')
-
-plt.tight_layout()
+plot_grid(history, x_costs)
+plot_combined(history, x_costs)
+plot_log_scale(history, x_costs)
+plot_decision_boundary(weights, X, y, L.sigmoid)
+plot_wallclock(history,times)
 plt.show()
