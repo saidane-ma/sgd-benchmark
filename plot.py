@@ -58,6 +58,50 @@ def plot_grid(history, x_costs, title="SGD Variants"):
 
     #plt.tight_layout()
 
+def plot_epoch_grid(history, x_costs, title="SGD Variants"):
+    names = list(history.keys())
+
+    fig, axs = plt.subplots(2, 2,figsize=(8,6),layout="constrained")
+    _apply_dark(fig, axs)
+    fig.suptitle(title, color=STYLE["text"], fontsize=13, fontweight="bold")
+
+    for idx, name in enumerate(names):
+
+        color = COLORS.get(name, "#FFFFFF")
+
+        axs[0,0].plot(x_costs[name], history[name], color=color, linewidth=1.6, label=name)
+        axs[0,0].set_xlabel("Gradient Calls")
+        axs[0,0].set_ylabel("Loss", fontsize=8)
+        legend = axs[0,0].legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+        
+        axs[0,1].plot(x_costs[name],history[name], color=color, linewidth=1.6, label=name)
+        axs[0,1].set_xlabel("Gradient Calls (Log)")
+        axs[0,1].set_xscale('log')
+        axs[0,1].set_yscale('log')
+        axs[0,1].set_ylabel("Loss (Log)", fontsize=8)
+        legend = axs[0,1].legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+        
+        axs[1,0].plot(history[name], color=color, linewidth=1.6, label=name)
+        axs[1,0].set_xlabel("Iterations")
+        axs[1,0].set_ylabel("Loss", fontsize=8)
+        legend = axs[1,0].legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+        
+        axs[1,1].plot(history[name], color=color, linewidth=1.6, label=name)
+        axs[1,1].set_xlabel("Iterations")
+        axs[1,1].set_yscale('log')
+        axs[1,1].set_ylabel("Loss (Log)", fontsize=8)
+        legend = axs[1,1].legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+        legend.get_frame().set_facecolor(STYLE["panel"])
+
+        
+
+    for idx in range(len(names), 4):
+        axs.flat[idx].set_visible(False)
+
 
 def plot_combined(history, x_costs):
     fig, ax = plt.subplots()
@@ -68,9 +112,10 @@ def plot_combined(history, x_costs):
         lw = 2.5 if name == "SVRG" else 1.5
         ax.plot(x_costs[name], losses, label=name,
                 color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9)
-        ax.set_xlim(min(x_costs[name]))
+        #ax.set_xlim(min(x_costs[name]))
 
     ax.set_xlabel("Gradient calls", fontsize=9)
+    ax.set_xscale('log')
     ax.set_ylabel("Loss", fontsize=9)
     legend = ax.legend(loc="upper right", framealpha=0.15,
                        labelcolor="linecolor", fontsize=9)
@@ -88,10 +133,9 @@ def plot_log_scale(history, x_costs):
         lw = 2.5 if name == "SVRG" else 1.5
         ax.semilogy(x_costs[name], losses, label=name,
                     color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9, nonpositive='mask')
-    ax.set_xlim(0,5000)
     ax.set_xlabel("Gradient calls", fontsize=9)
     ax.set_ylabel("Loss", fontsize=9)
-    ax.set_yscale('log')
+    ax.set_xscale('log')
     legend = ax.legend(loc="upper right", framealpha=0.15,
                        labelcolor="linecolor", fontsize=9)
     legend.get_frame().set_facecolor(STYLE["panel"])
@@ -157,7 +201,7 @@ def plot_grad_norms(grad_histories):
     plt.tight_layout()
 
 
-def plot_wallclock(history, times):
+def plot_wallclock_log(history, times):
     """
     times : dict  name → list of cumulative seconds
     """
@@ -166,13 +210,43 @@ def plot_wallclock(history, times):
     ax.set_title("Convergence vs Wall-Clock Time", color=STYLE["text"], fontsize=12)
 
     for name, losses in history.items():
-        lw = 2.5 if name == "SVRG" else 1.5
-        ax.semilogy(times[name], losses, label=name,
+        lw = 2.5 if name == "SVRG" else 1.5 #highlight svrg
+        ax.plot(times[name], losses, label=name,
                 color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9)
-    ax.set_xlim(0,0.02)
-    ax.set_xlabel("Time (seconds)", fontsize=9)
+    ax.set_xlabel("Time (Log)", fontsize=9)
+    ax.set_xscale('log')
     ax.set_ylabel("Loss", fontsize=9)
     legend = ax.legend(loc="upper right", framealpha=0.15,
                        labelcolor="linecolor", fontsize=9)
     legend.get_frame().set_facecolor(STYLE["panel"])
+    plt.tight_layout()
+
+
+def plot_wallclock(history, times):
+    """
+    times : dict  name → list of cumulative seconds
+    """
+    fig, ax = plt.subplots(1,2)
+    _apply_dark(fig, [ax])
+    fig.suptitle("Convergence vs Wall-Clock Time", color=STYLE["text"], fontsize=12)
+
+    for name, losses in history.items():
+        lw = 2.5 if name == "SVRG" else 1.5 #highlight svrg
+        ax[0].plot(times[name], losses, label=name,
+                color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9)
+        ax[1].plot(times[name], losses, label=name,
+                color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9)
+    
+    ax[0].set_xlabel("Time (seconds)", fontsize=9)
+    ax[0].set_ylabel("Loss", fontsize=9)
+    legend = ax[0].legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+
+    ax[1].set_xlim(0,max(times["Nesterov"]))
+    ax[1].set_xlabel("Time (seconds)", fontsize=9)
+    ax[1].set_ylabel("Loss", fontsize=9)
+    legend = ax[1].legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+    legend.get_frame().set_facecolor(STYLE["panel"])
+
     plt.tight_layout()
