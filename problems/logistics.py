@@ -8,7 +8,7 @@ class LogisticRegression:
     def sigmoid(self,z):
         return 1/(1+np.exp(-z))
     
-    def loss(self,w,lamda=0.01):
+    def loss(self,w,lamda=0.001):
         z=self.X@w
         y_pred=self.sigmoid(z)
         n=len(self.X)

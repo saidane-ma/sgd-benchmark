@@ -7,7 +7,7 @@ class Adam:
         self.y=y
         self.L=LogisticRegression(self.X,self.y)
         
-    def adam(self,w,indices,n,beta1=0.9,beta2=0.999,alpha=0.01,grad=None):
+    def adam(self,w,indices,n,beta1=0.9,beta2=0.999,alpha=0.1,grad=None):
         if grad is None:
             g=self.L.gradient(w,indices)
         else:
