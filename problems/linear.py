@@ -1,7 +1,7 @@
 import numpy as np
 
 class LinearRegression:
-    def __init___(self,X,y):
+    def __init__(self,X,y):
         self.X=X
         self.y=y
     
