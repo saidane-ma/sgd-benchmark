@@ -6,16 +6,11 @@ class Adam:
         self.X=X
         self.y=y
         self.L=LogisticRegression(self.X,self.y)
+        self.m=np.zeros_like(w)
+        self.m2=np.zeros_like(w)
         
-    def adam(self,w,indices,n,beta1=0.9,beta2=0.999,alpha=0.1,grad=None):
-        if grad is None:
-            g=self.L.gradient(w,indices)
-        else:
-            g=grad
-        if not hasattr(self,'m') or self.m.shape!=g.shape:
-            self.m=np.zeros_like(g)
-            self.m2=np.zeros_like(g)
-
+    def adam(self,w,indices,n,beta1=0.9,beta2=0.999,alpha=0.01,grad=None):
+        g=self.L.gradient(w,indices)
         self.m=self.m*beta1 + (1-beta1)*g
         self.m2=self.m2*beta2 + (1-beta2)*g*g
         
