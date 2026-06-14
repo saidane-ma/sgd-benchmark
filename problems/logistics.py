@@ -8,14 +8,14 @@ class LogisticRegression:
     def sigmoid(self,z):
         return 1/(1+np.exp(-z))
     
-    def loss(self,w,lamda=0.001):
+    def loss(self,w,lamda=0.01):
         z=self.X@w
         y_pred=self.sigmoid(z)
         n=len(self.X)
         s=-self.y*np.log(y_pred+(1e-10))-(1-self.y)*np.log(1-y_pred+(1e-10))
 
         return np.sum(s)/n + lamda*0.5*np.linalg.norm(w)**2 #L2 regularization
-    def gradient(self,w,indices=None):
+    def gradient(self,w,indices=None, lamda=0.01):
         if indices is None:
             X_batch=self.X
             y_batch=self.y
@@ -26,4 +26,4 @@ class LogisticRegression:
             n=len(indices)
         y_pred=self.sigmoid(X_batch@w)
         err=y_pred-y_batch
-        return (1/n)*np.transpose(X_batch)@err
+        return (1/n)*np.transpose(X_batch)@err + lamda*w
