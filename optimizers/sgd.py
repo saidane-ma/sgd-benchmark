@@ -9,6 +9,7 @@ class SGD:
         self.v_polyak=np.zeros_like(w)
         self.v_nestrov=np.zeros_like(w)
         self.v_momentum=np.zeros_like(w)
+        self.L=LogisticRegression(self.X,self.y)
         self.mode=mode
     
     def polyak(self,w,indices,alpha=0.1,beta=0.9):
@@ -29,7 +30,7 @@ class SGD:
         w-=self.v_nestrov
         return w
     
-    def step(self,w,indices,i,alpha=0.1,beta1=0.9,beta2=0.99,mode="polyak"):
-        if mode=="polyak": return self.polyak(w,indices,alpha,beta1)
-        elif mode=="nesterov" : return self.nestrov(w,indices,0.01,beta2)
-        else : return w-alpha*self.L.gradient(w,indices)
+    def step(self,w,indices,i,alpha=0.001,beta1=0.9,beta2=0.99):
+        if self.mode=="polyak": return self.polyak(w,indices,alpha,beta1)
+        elif self.mode=="nesterov" : return self.nestrov(w,indices,0.001,beta2)
+        else : return w - 0.01*self.L.gradient(w,indices)
