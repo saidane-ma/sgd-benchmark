@@ -22,7 +22,7 @@ def generate_gaussian_blobs(n_features=2, n_samples=1000, random_state_seed=5,fa
     y = np.concatenate((y0, y1))
     X = np.insert(X, 0, b, axis=1)
     
-    indices = np.random.permutation(n_samples)
+    indices = np.random.permutation(n_samples) #shuffling points
     X = X[indices]
     y = y[indices]
 
