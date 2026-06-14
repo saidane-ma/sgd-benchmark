@@ -15,11 +15,11 @@ import time
 np.random.seed(5)
 
 #parameters
-n_samples=1000
+n_samples=100
 n_features=2
 alpha=0.01
-n_iterations=150
-batch_size=15
+n_iterations=500
+batch_size=10
 beta=0.9
 
 #data generation
