@@ -17,5 +17,5 @@ class SAG:
         self.g[k]=self.L.gradient(w,[k])
         w-=alpha*np.mean(self.g,axis=0)
         return w
-    def step(self,w,indices,i,alpha=0.003):
+    def step(self,w,indices,i,alpha=0.05):
         return self.sag(w,indices,alpha)
