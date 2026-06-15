@@ -28,6 +28,3 @@ def generate_gaussian_blobs(n_features=2, n_samples=1000, random_state_seed=5,fa
 
     return X,y
 
-X , y =generate_gaussian_blobs()
-print(np.shape(X))
-print(np.shape(y))
