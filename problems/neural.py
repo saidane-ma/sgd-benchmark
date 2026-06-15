@@ -1,7 +1,7 @@
 import numpy as np
 from problems.logistics import *
 
-class NN:
+class NeuralNet:
     def __init__(self,X,y):
         self.X=X
         self.y=y
