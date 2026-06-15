@@ -1,216 +1,175 @@
+import os
+import time
 import numpy as np
 import matplotlib.pyplot as plt
-from data import*
-from problems.logistics import*
-from optimizers.sgd import *
-from optimizers.adagrad import*
-from optimizers.adam import *
-from optimizers.sag import *
-from optimizers.svrg import *
-from problems.linear import*
-from problems.neural import*
-from plot import*
-import time
 
-np.random.seed(5)
+from config import CONFIG
+from data import *
+from plot import *
 
-#parameters
-n_samples=100
-n_features=2
-alpha=0.01
-n_iterations=500
-batch_size=10
-beta=0.9
+# Import Problems
+from problems.logistics import LogisticRegression
+from problems.linear import LinearRegression
+from problems.neural import NeuralNet
 
-#data generation
-X, y=generate_gaussian_blobs(n_features,n_samples,center=0.75)
+# Import Optimizers
+from optimizers.sgd import SGD
+from optimizers.adam import Adam
+from optimizers.sag import SAG
+from optimizers.svrg import SVRG
+from optimizers.adagrad import Adagrad
 
-L=LogisticRegression(X,y)
-Lin=LinearRegression(X,y)
-nn=NN(X,y)
-
-w= np.random.randn(n_features + 1)
-
-
-w0 = np.copy(w) # SGD
-w1 = np.copy(w) # Adagrad
-w2 = np.copy(w) # Polyak
-w3 = np.copy(w) # Nesterov
-w4 = np.copy(w) # Adam
-w5 = np.copy(w) # SAG
-w6 = np.copy(w) # SVRG
-
-initial_loss=L.loss(w)
-
-#storing for plot
-history = {
-    "SGD":      [initial_loss],
-    "Polyak":   [initial_loss],
-    "Nesterov": [initial_loss],
-    "Adagrad":  [initial_loss],
-    "Adam":     [initial_loss],
-    "SAG":      [initial_loss],
-    "SVRG":     [initial_loss],
-}
-
-
-weights = {
-    "SGD": w0, "Polyak": w2, "Nesterov": w3,
-    "Adagrad": w1, "Adam": w4, "SAG": w5, "SVRG": w6
-}
-
-
-optimizers={
-    "SGD":      SGD(X, y, w,"SGD"),
-    "Polyak":   SGD(X, y, w,"polyak"),
-    "Nesterov": SGD(X, y, w,"nesterov"),
-    "Adagrad":  Adagrad(X, y, w),
-    "Adam":     Adam(X, y, w),
-    "SAG":      SAG(X, y, w),
-    "SVRG":     SVRG(X, y, w),
-}
-
-
-times = {name: [0] for name in history}
-t_cumul = {name: 0.0 for name in history}
-
-#added different steps for x axis to account for different computation approaches and hold a fair comparaison on the plots
-
-iterations = np.arange(n_iterations+1)
-
-x_sgd =iterations *batch_size 
-x_polyak =iterations* batch_size
-x_adam = iterations *batch_size
-x_adagrad= iterations * batch_size
-x_sag= iterations *1
-x_svrg=iterations*(n_samples+(2*n_samples))
-
-#benchmarking loop
-for i in range(n_iterations):
-    indices=np.random.choice(n_samples,size=(batch_size,),replace=False)
+def run_problem_benchmarks(problem_name):
+    print(f"\n================ Running: {problem_name.upper()} ================")
+    cfg = CONFIG[problem_name]
     
-    for name, optimizer in optimizers.items():
-        t0 = time.perf_counter()
-        history[name].append(L.loss(weights[name]))
-        weights[name]=optimizer.step(weights[name],indices,i+1)
-        t_cumul[name] += time.perf_counter()-t0
-        times[name].append(t_cumul[name])
-
-x_costs = {
-    "SGD":      x_sgd,
-    "Polyak":   x_polyak,
-    "Nesterov": x_sgd,
-    "Adagrad":  x_adagrad,
-    "Adam":     x_adam,
-    "SAG":      x_sag,
-    "SVRG":     x_svrg,
-}
-
-
-#plotting
-print (" Plotting Iteration Benchmarking")
-
-plot_grid(history, x_costs)
-plot_combined(history, x_costs)
-plot_log_scale(history, x_costs)
-plot_decision_boundary(weights, X, y, L.sigmoid)
-plot_wallclock(history,times)
-plot_wallclock_log(history,times)
-plot_epoch_grid(history,x_costs)
-
-
-
-#//////////////////////////////////////////////////////////
-
-
-history={
-    "SGD":      [initial_loss],
-    "Polyak":   [initial_loss],
-    "Nesterov": [initial_loss],
-    "Adagrad":  [initial_loss],
-    "Adam":     [initial_loss],
-    "SAG":      [initial_loss],
-    "SVRG":     [initial_loss],
-}
-
-
-print("Grad Calls Based Benchmarking ...")
-
-#benchmark loop with max grads
-max_grad_calls = 100000
-
-w0 = np.copy(w) # SGD
-w1 = np.copy(w) # Adagrad
-w2 = np.copy(w) # Polyak
-w3 = np.copy(w) # Nesterov
-w4 = np.copy(w) # Adam
-w5 = np.copy(w) # SAG
-w6 = np.copy(w) # SVRG
-
-weights = {
-    "SGD": w0, "Polyak": w2, "Nesterov": w3,
-    "Adagrad": w1, "Adam": w4, "SAG": w5, "SVRG": w6
-}
-
-
-optimizers={
-    "SGD":      SGD(X, y, weights["SGD"],"SGD"),
-    "Polyak":   SGD(X, y, weights["Polyak"],"polyak"),
-    "Nesterov": SGD(X, y, weights["Nesterov"],"nesterov"),
-    "Adagrad":  Adagrad(X, y, weights["Adagrad"]),
-    "Adam":     Adam(X, y, weights["Adam"]),
-    "SAG":      SAG(X, y, weights["SAG"]),
-    "SVRG":     SVRG(X, y, weights["SVRG"]),
-}
-
-times = {name: [0] for name in history}
-t_cumul = {name: 0.0 for name in history}
-
-
-x_costs = {
-    "SGD":      [0],
-    "Polyak":   [0],
-    "Nesterov": [0],
-    "Adagrad":  [0],
-    "Adam":     [0],
-    "SAG":      [0],
-    "SVRG":     [0],
-}
-
-
-for name, optimizer in optimizers.items():
-    t_cumul=0.0
-    current_grads=0
-    i=0
-    while current_grads<max_grad_calls:
-        i+=1 
-        indices = np.random.choice(n_samples, size=(batch_size,), replace=False)
+    # Output Folder
+    output_dir = f"outputs/{problem_name}"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Data Gen
+    X, y = generate_gaussian_blobs(n_features=cfg["n_features"], n_samples=cfg["n_samples"])
+    
+    # Problems Setup
+    if problem_name == "logistic":
+        prob_instance = LogisticRegression(X, y)
+        w_init = np.random.randn(cfg["n_features"] + 1)
+    elif problem_name == "linear":
+        prob_instance = LinearRegression(X, y)
+        w_init = np.random.randn(cfg["n_features"] + 1)
+    elif problem_name == "neural_network":
+        prob_instance = NeuralNet(X, y)
+        w_init = np.random.randn(cfg["n_features"] + 1) 
         
-        t0 = time.perf_counter()
-        weights[name] = optimizer.step(weights[name], indices,i)
-        t_cumul += (time.perf_counter()-t0)
-        
-        if name == "SVRG":
-            current_grads +=(n_samples + 2*n_samples)
-        elif name == "SAG":
-            current_grads+=1
-        else:
-            current_grads += batch_size
-        history[name].append(L.loss(weights[name]))
-        x_costs[name].append(current_grads)
-        times[name].append(t_cumul)
+    initial_loss = prob_instance.loss(w_init)
+    
+    # Optimizers init
+    optimizers = {
+        "SGD":      SGD(prob_instance, "SGD",w_init),
+        "Polyak":   SGD(prob_instance, "polyak",w_init),
+        "Nesterov": SGD(prob_instance, "nesterov",w_init),
+        "Adagrad":  Adagrad(w_init,prob_instance),
+        "Adam":     Adam(w_init,prob_instance),
+        "SAG":      SAG(prob_instance,w_init),
+        "SVRG":     SVRG(prob_instance),
+    }
+    
+
+    # ------------------ BENCHMARK 1: ITERATIONS ------------------
+    print("Running Iteration Benchmark...")
+    history = {name: [initial_loss] for name in optimizers}
+    weights = {name: np.copy(w_init) for name in optimizers}
+    times = {name: [0.0] for name in optimizers}
+    t_cumul = {name: 0.0 for name in optimizers}
+
+    t1=time.perf_counter()
+
+    for i in range(cfg["n_iterations"]):
+        indices = np.random.choice(cfg["n_samples"], size=(cfg["num_batch"] if "num_batch" in cfg else cfg["batch_size"],), replace=False)
+        for name, opt in optimizers.items():
+            opt_params = cfg["optimizers"][name]
+            
+            t0 = time.perf_counter()
+            weights[name] = opt.step(weights[name], indices, i+1, **opt_params)
+            t_cumul[name] +=(time.perf_counter()-t0)
+            
+            history[name].append(prob_instance.loss(weights[name]))
+            times[name].append(t_cumul[name])
+
+    print(f"Benchmark 1 lasted {(time.perf_counter()-t1):.3f} seconds")   
+
+    # X_costs
+    iterations = np.arange(cfg["n_iterations"] + 1)
+    x_costs = {name: iterations * cfg["batch_size"] for name in optimizers}
+    x_costs["SAG"] = iterations *1 + cfg["n_iterations"]
+    x_costs["SVRG"] = iterations*(cfg["n_samples"]*5)
+
+    print("Saving Benchmar 1 Plot Results ...")
+    # Plot Saving
+    plot_combined(history, x_costs)
+    plt.savefig(f"{output_dir}/iterations_combined.png")
+    plt.close()
+    
+    plot_grid(history, x_costs)
+    plt.savefig(f"{output_dir}/iterations_grid.png")
+    plt.close()
+    
+    plot_log_scale(history, x_costs)
+    plt.savefig(f"{output_dir}/iterations_log.png")
+    plt.close()
+    
+    plot_decision_boundary(weights, X, y, LogisticRegression(X,y).sigmoid)
+    plt.savefig(f"{output_dir}/iterations_decision.png")
+    plt.close()
+    
+    plot_wallclock_log(history,times)
+    plt.savefig(f"{output_dir}/iterations_clocklog.png")
+    plt.close()
+
+    plot_epoch_grid(history,x_costs)
+    plt.savefig(f"{output_dir}/iterations_epoch.png")
+    plt.close()
+
+    plot_wallclock(history, times)
+    plt.savefig(f"{output_dir}/iterations_wallclock.png")
+    plt.close()
+    
+    
+    # ------------------ BENCHMARK 2: GRADIENT CALLS ------------------
+    print("Running Gradient Calls Benchmark...")
+
+    history_grad = {name: [initial_loss] for name in optimizers}
+    weights_grad = {name: np.copy(w_init) for name in optimizers}
+    x_costs_grad = {name: [0] for name in optimizers}
+
+    t1=time.perf_counter()
+
+    for name, opt in optimizers.items():
+        current_grads=0
+        if (name=="SAG"): current_grads= cfg["n_iterations"]
+        i =0
+        opt_params= cfg["optimizers"][name]
+        while current_grads <cfg["max_grad_calls"]:
+            i+=1
+            indices=np.random.choice(cfg["n_samples"], size=(cfg["batch_size"],), replace=False)
+            
+            weights_grad[name] =opt.step(weights_grad[name],indices,i, **opt_params)
+            if name == "SVRG":
+                current_grads += (cfg["n_samples"]*5)
+            elif name == "SAG":
+                current_grads += 1
+            else:
+                current_grads += cfg["batch_size"]
+                
+            history_grad[name].append(prob_instance.loss(weights_grad[name]))
+            x_costs_grad[name].append(current_grads)
+
+    print(f"Benchmark lasted {(time.perf_counter()-t1):.3f} seconds")
 
 
+    print("Plotting Gradient Calls Results")
 
 
-#plotting
-print (" Plotting Max Grad Benchmarking")
+    plot_combined(history_grad, x_costs_grad)
+    plt.savefig(f"{output_dir}/grad_calls_combined.png")
+    plt.close()
+    
+    plot_grid(history_grad, x_costs_grad)
+    plt.savefig(f"{output_dir}/grad_calls_grid.png")
+    plt.close()
+    
+    plot_log_scale(history_grad, x_costs_grad)
+    plt.savefig(f"{output_dir}/grad_calls_log.png")
+    plt.close()
+    
+    plot_decision_boundary(weights_grad, X, y, LogisticRegression(X,y).sigmoid)
+    plt.savefig(f"{output_dir}/grad_calls_decision.png")
+    plt.close() 
+    
+    print(f"Plots saved to: {output_dir}/")
 
-plot_grid(history, x_costs)
-plot_combined(history, x_costs)
-plot_log_scale(history, x_costs)
-plot_decision_boundary(weights, X, y, L.sigmoid)
-plot_wallclock(history,times)
-plot_wallclock_log(history,times)
-
-plt.show()
+if __name__ == "__main__":
+    np.random.seed(5)
+    for problem in ["logistic"]:
+        print(f"Starting problem {problem}")
+        run_problem_benchmarks(problem)
