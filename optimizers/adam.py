@@ -1,16 +1,14 @@
 import numpy as np
-from problems.logistics import *
+from problems import *
 
 class Adam:
-    def __init__(self,X,y,w):
-        self.X=X
-        self.y=y
-        self.L=LogisticRegression(self.X,self.y)
+    def __init__(self,w,problem):
+        self.problem=problem
         self.m=np.zeros_like(w)
         self.m2=np.zeros_like(w)
         
     def adam(self,w,indices,n,beta1=0.9,beta2=0.999,alpha=0.01,grad=None):
-        g=self.L.gradient(w,indices)
+        g=self.problem.gradient(w,indices)
         self.m=self.m*beta1 + (1-beta1)*g
         self.m2=self.m2*beta2 + (1-beta2)*g*g
         
@@ -21,5 +19,5 @@ class Adam:
 
         return w
     
-    def step(self,w,indices,i):
-        return self.adam(w,indices,i)
+    def step(self,w,indices,i,alpha,beta1,beta2,**kwargs):
+        return self.adam(w,indices,i,beta1,beta2,alpha)
