@@ -1,19 +1,18 @@
 import numpy as np
-from problems.logistics import *
+from problems import *
 
 class SVRG:
-    def __init__(self,X,y,w):
-        self.X=X
-        self.y=y
-        self.L=LogisticRegression(X,y)
+    def __init__(self,problem):
+        self.X=problem.X
+        self.problem=problem
         
     def svrg(self,w,indices,alpha=0.001):
         w_tilde=w.copy()
-        mu=self.L.gradient(w_tilde)
+        mu=self.problem.gradient(w_tilde)
         for i in range(2*len(self.X)):
             k= np.random.choice(len(self.X))
-            g=self.L.gradient(w,[k])-self.L.gradient(w_tilde,[k])+mu
+            g=self.problem.gradient(w,[k])-self.problem.gradient(w_tilde,[k])+mu
             w-= g*alpha
         return w 
-    def step(self,w,indices,i,alpha=0.001):
+    def step(self,w,indices,i,alpha=0.001,**kwargs):
         return self.svrg(w,indices,alpha)
