@@ -1,6 +1,6 @@
 import numpy as np
 
-def generate_gaussian_blobs(n_features=2, n_samples=1000, random_state_seed=5,factor=0.5,center=3.0):
+def generate_gaussian_blobs(n_features=2, n_samples=1000, random_state_seed=5,factor=0.5,center=0.5):
     """
     Generates linearly separable Gaussian blobs for binary classification.
     Returns:
