@@ -123,6 +123,27 @@ def plot_combined(history, x_costs):
     plt.tight_layout()
 
 
+
+
+
+def plot_combined_grad(history, x_costs):
+    fig, ax = plt.subplots()
+    _apply_dark(fig, [ax])
+    ax.set_title("Stochastic Optimization — Convergence", color=STYLE["text"], fontsize=12)
+
+    for name, losses in history.items():
+        lw = 2.5 if name == "SVRG" else 1.5
+        ax.plot(x_costs[name], losses, label=name,
+                color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9)
+        #ax.set_xlim(min(x_costs[name]))
+
+    ax.set_xlabel("Gradient calls", fontsize=9)
+    ax.set_ylabel("Loss", fontsize=9)
+    legend = ax.legend(loc="upper right", framealpha=0.15,
+                       labelcolor="linecolor", fontsize=9)
+    legend.get_frame().set_facecolor(STYLE["panel"])
+    plt.tight_layout()
+
 def plot_log_scale(history, x_costs, problem,loss_=None):
     fig, ax = plt.subplots()
     _apply_dark(fig, [ax])
@@ -146,7 +167,7 @@ def plot_log_scale(history, x_costs, problem,loss_=None):
     plt.tight_layout()
 
 
-def plot_decision_boundary(weights, X, y, sigmoid_fn):
+def plot_decision_boundary(weights, X, y, sigmoid_fn,problem="logistic",prob_instance=None):
     """
     weights   : dict  name → w  (shape d+1 with bias prepended)
     X         : (n, d) no bias column
@@ -162,7 +183,6 @@ def plot_decision_boundary(weights, X, y, sigmoid_fn):
     y_min, y_max =X[:, 2].min()-0.5, X[:, 2].max()+0.5
     xx, yy = np.meshgrid(np.linspace(x_min, x_max, 300),np.linspace(y_min, y_max, 300))
     grid = np.c_[np.ones(xx.ravel().shape), xx.ravel(), yy.ravel()]
-
     fig, axs = plt.subplots(rows, cols)
     _apply_dark(fig, axs)
     fig.suptitle("Decision Boundaries", color=STYLE["text"], fontsize=13,fontweight="bold")
@@ -173,7 +193,11 @@ def plot_decision_boundary(weights, X, y, sigmoid_fn):
     for idx, name in enumerate(names):
         ax = axs.flat[idx]
         w = weights[name]
-        Z = sigmoid_fn(grid @ w).reshape(xx.shape)
+        if problem!="neural_network":
+            Z=sigmoid_fn(grid@w).reshape(xx.shape)
+        else :
+            Z=prob_instance.predict_grid(grid,weights[name]).reshape(xx.shape)
+
         ax.contourf(xx, yy, Z, alpha=0.35, cmap=cmap_bg, levels=50)
         ax.contour(xx, yy, Z, levels=[0.5],
                    colors=[COLORS.get(name, "#FFFFFF")], linewidths=1.5)
