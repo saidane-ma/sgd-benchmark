@@ -156,7 +156,7 @@ def plot_log_scale(history, x_costs, problem,loss_=None):
          loss = min(min(v) for v in history.values())
     for name, losses in history.items():
         lw = 2.5 if name == "SVRG" else 1.5
-        subopt = [max(l-loss, 1e-10) for l in losses]
+        subopt = [l-loss + 1e-10 for l in losses]
         ax.semilogy(x_costs[name], subopt, label=name,
                     color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9, nonpositive='mask')
     ax.set_xlabel("Gradient calls", fontsize=9)
