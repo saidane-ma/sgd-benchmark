@@ -18,17 +18,17 @@ CONFIG = {
     "Linear": {
         "n_samples": 1000,
         "n_features": 2,
-        "n_iterations": 200,
+        "n_iterations": 500,
         "batch_size": 32,
         "noise": 0.1,
         "max_grad_calls": 50000,
         "optimizers": {
             "SGD":      {"alpha": 0.05},
             "Polyak":   {"alpha": 0.005, "beta": 0.9},
-            "Nesterov": {"alpha": 0.0001, "beta": 0.5},
+            "Nesterov": {"alpha": 0.001, "beta": 0.8},
             "Adagrad":  {"alpha": 0.5},
-            "Adam":     {"alpha": 0.2,  "beta1": 0.9, "beta2": 0.999},
-            "SAG":      {"alpha": 0.001},
+            "Adam":     {"alpha": 0.5,  "beta1": 0.8, "beta2": 0.999},
+            "SAG":      {"alpha": 0.0008},
             "SVRG":     {"alpha": 0.005}
         }
     },
@@ -37,17 +37,17 @@ CONFIG = {
         "n_features": 2,
         "hidden": 4,
         "activation": "sigmoid",
-        "n_iterations": 300,
+        "n_iterations": 2,
         "batch_size": 10,
-        "max_grad_calls": 200000,
+        "max_grad_calls": 20000,
         "optimizers": {
-            "SGD":      {"alpha": 0.1},
-            "Polyak":   {"alpha": 0.05, "beta": 0.9},
-            "Nesterov": {"alpha": 0.05, "beta": 0.9},
-            "Adagrad":  {"alpha": 0.01},
-            "Adam":     {"alpha": 0.001,  "beta1": 0.9, "beta2": 0.999},
-            "SAG":      {"alpha": 0.01},
-            "SVRG":     {"alpha": 0.005}
+            "SGD":      {"alpha": 0.5},
+            "Polyak":   {"alpha": 0.1, "beta": 0.9},
+            "Nesterov": {"alpha": 0.5, "beta": 0.99},
+            "Adagrad":  {"alpha": 0.4},
+            "Adam":     {"alpha": 0.1,  "beta1": 0.9, "beta2": 0.999},
+            "SAG":      {"alpha": 0.08},
+            "SVRG":     {"alpha": 0.01}
         }
     }
 }
