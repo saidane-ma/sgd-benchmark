@@ -123,20 +123,23 @@ def plot_combined(history, x_costs):
     plt.tight_layout()
 
 
-def plot_log_scale(history, x_costs):
+def plot_log_scale(history, x_costs, problem,loss_=None):
     fig, ax = plt.subplots()
     _apply_dark(fig, [ax])
-    ax.set_title("Convergence — Log Scale  (linear vs sublinear separation)",
+    ax.set_title("Suboptimality — Log Scale",
                  color=STYLE["text"], fontsize=12)
-
+    
+    if problem == "Linear":
+        loss = loss_
+    else :
+         loss = min(min(v) for v in history.values())
     for name, losses in history.items():
         lw = 2.5 if name == "SVRG" else 1.5
-        loss = min(min(v) for v in history.values())
-        subopt = [l - loss + 1e-10 for l in losses]
+        subopt = [max(l-loss, 1e-10) for l in losses]
         ax.semilogy(x_costs[name], subopt, label=name,
                     color=COLORS.get(name, "#FFFFFF"), linewidth=lw, alpha=0.9, nonpositive='mask')
     ax.set_xlabel("Gradient calls", fontsize=9)
-    ax.set_xscale('symlog')
+    #ax.set_xscale('symlog')
     legend = ax.legend(loc="upper right", framealpha=0.15,
                        labelcolor="linecolor", fontsize=9)
     legend.get_frame().set_facecolor(STYLE["panel"])
@@ -251,3 +254,4 @@ def plot_wallclock(history, times):
     legend.get_frame().set_facecolor(STYLE["panel"])
 
     plt.tight_layout()
+
