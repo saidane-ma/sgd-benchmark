@@ -108,7 +108,10 @@ def run_problem_benchmarks(problem_name):
     plt.close()
     
     if problem_name != "Linear":
-        plot_decision_boundary(weights, X, y, LogisticRegression(X,y).sigmoid)
+        if problem_name=="logistic":   
+            plot_decision_boundary(weights, X, y, LogisticRegression(X,y).sigmoid)
+        else:
+            plot_decision_boundary(weights,X,y,LogisticRegression(X,y).sigmoid,problem_name,prob_instance)
         plt.savefig(f"{output_dir}/iterations_decision.png")
         plt.close()
     
@@ -143,11 +146,18 @@ def run_problem_benchmarks(problem_name):
 
     t1=time.perf_counter()
 
+    lr_decay_step = cfg["max_grad_calls"]//5
     for name, opt in optimizers.items():
         current_grads=0
         if (name=="SAG"): current_grads= cfg["n_samples"]
         i =0
+
+        initial_lr = cfg["optimizers"][name]["alpha"]
+        decay_factor = 1.0**(current_grads//lr_decay_step)
+        current_lr = initial_lr*decay_factor
         opt_params= cfg["optimizers"][name]
+        opt_params["alpha"] = current_lr
+
         while current_grads <cfg["max_grad_calls"]:
             i+=1
             indices=np.random.choice(cfg["n_samples"], size=(cfg["batch_size"],), replace=False)
@@ -169,7 +179,7 @@ def run_problem_benchmarks(problem_name):
     print("Plotting Gradient Calls Results")
 
 
-    plot_combined(history_grad, x_costs_grad)
+    plot_combined_grad(history_grad, x_costs_grad)
     plt.savefig(f"{output_dir}/grad_calls_combined.png")
     plt.close()
     
@@ -185,8 +195,11 @@ def run_problem_benchmarks(problem_name):
     plt.savefig(f"{output_dir}/grad_calls_log.png")
     plt.close()
 
-    if problem_name!="Linear":   
-        plot_decision_boundary(weights_grad, X, y, LogisticRegression(X,y).sigmoid)
+    if problem_name!="Linear":
+        if problem_name=="logistic":   
+            plot_decision_boundary(weights_grad, X, y, LogisticRegression(X,y).sigmoid)
+        else:
+            plot_decision_boundary(weights_grad,X,y,LogisticRegression(X,y).sigmoid,problem_name,prob_instance)
         plt.savefig(f"{output_dir}/grad_calls_decision.png")
         plt.close() 
     
@@ -194,6 +207,6 @@ def run_problem_benchmarks(problem_name):
 
 if __name__ == "__main__":
     np.random.seed(5)
-    for problem in ["Linear"]:
+    for problem in ["neural_network"]:
         print(f"Starting problem {problem}")
         run_problem_benchmarks(problem)
