@@ -28,3 +28,15 @@ def generate_gaussian_blobs(n_features=2, n_samples=1000, random_state_seed=5,fa
 
     return X,y
 
+def generate_regression_data(n_features=2,n_samples=1000,noise=1e-1,random_state_seed=5):
+
+    np.random.seed(random_state_seed)
+
+    X=np.random.randn(n_samples,n_features)
+    b=np.array([1]*n_samples)
+    X=np.insert(X,0,b,axis=1)
+    
+    w=np.random.randn(n_features+1)
+    y= X@w + noise*np.random.randn(n_samples)
+
+    return X,y
