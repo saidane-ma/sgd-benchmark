@@ -27,7 +27,7 @@ All comparisons are normalized by **gradient calls** (not iterations) for a fair
 ### Linear Regression
 
 <p align="center">
-  <img src="outputs/linear/grad_calls_log.png" width="700"/>
+  <img src="outputs/Linear/grad_calls_log.png" width="700"/>
 </p>
 
 SVRG and SAG achieve **linear convergence** — visible as a straight line on the log scale. SGD-family methods plateau at a noise floor $\sigma^2/(2\alpha)$ regardless of how long they run.
