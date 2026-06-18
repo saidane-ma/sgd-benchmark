@@ -33,11 +33,11 @@ CONFIG = {
         }
     },
     "neural_network": {
-        "n_samples": 500,
+        "n_samples": 1000,
         "n_features": 2,
         "hidden": 4,
         "activation": "sigmoid",
-        "n_iterations": 2,
+        "n_iterations": 200,
         "batch_size": 10,
         "max_grad_calls": 20000,
         "optimizers": {
@@ -46,7 +46,7 @@ CONFIG = {
             "Nesterov": {"alpha": 0.5, "beta": 0.99},
             "Adagrad":  {"alpha": 0.4},
             "Adam":     {"alpha": 0.1,  "beta1": 0.9, "beta2": 0.999},
-            "SAG":      {"alpha": 0.08},
+            "SAG":      {"alpha": 0.008},
             "SVRG":     {"alpha": 0.01}
         }
     }
