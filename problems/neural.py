@@ -75,3 +75,17 @@ class NeuralNet:
         gw1 , gw2,_=self.activation(w1,w2)
         return self.flatten(gw1,gw2)
     
+    def predict_grid(self,grid,w):
+        w1,w2=self.unflatten(w)
+        z=grid@w1
+
+        if self.activation==self.sigmoid_NN:
+            y1=self.L.sigmoid(z)
+        elif self.activation==self.ReLU_NN:
+            y1=np.maximum(0,z)
+        else:
+            y1=np.tanh(z)
+
+        y1_=np.insert(y1,0,1,axis=1)
+        y_pred=self.L.sigmoid(y1_@w2)
+        return y_pred.flatten()
