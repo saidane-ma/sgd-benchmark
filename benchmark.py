@@ -153,7 +153,7 @@ def run_problem_benchmarks(problem_name):
         i =0
 
         initial_lr = cfg["optimizers"][name]["alpha"]
-        decay_factor = 1.0**(current_grads//lr_decay_step)
+        decay_factor = 1.0**(current_grads//lr_decay_step) #currently not in use factor = 1.0
         current_lr = initial_lr*decay_factor
         opt_params= cfg["optimizers"][name]
         opt_params["alpha"] = current_lr
