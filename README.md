@@ -150,7 +150,7 @@ outputs/logistic/
 
 ## Implementation Notes
 
-**Fair comparison.** Each optimizer is compared on total gradient evaluations, not iterations. SVRG costs $n + 4 \cdot \text{n\_samples}$ per step; SAG costs 1; SGD/Adam/AdaGrad cost $\text{batch\_size}$.
+**Fair comparison.** Each optimizer is compared on total gradient evaluations, not iterations. SVRG costs $`n + 4 \cdot \text{n\_samples}`$ per step; SAG costs 1; SGD/Adam/AdaGrad cost $`\text{batch\_size}`$.
 
 **Suboptimality metric.** For linear regression, $L(w^*)$ is computed exactly via `np.linalg.lstsq`. For logistic regression and NN, the empirical minimum across all optimizers is used as a proxy.
 
